@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal SubConverter</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }
+        .dark { background: #333; color: #f5f5f5; }
+        input, select, button { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007bff; color: white; cursor: pointer; }
+        .dark input, .dark select, .dark button { background: #444; color: #f5f5f5; border-color: #555; }
+        #output { background: white; padding: 15px; border-radius: 5px; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+        .dark #output { background: #444; }
+        .toggle { position: fixed; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <button class="toggle" onclick="toggleDark()">🌙</button>
+    <h1>Universal SubConverter (2025版)</h1>
+    <p>支持 200+ 协议 & 客户端：vmess/vless/trojan/ss/ssr/hysteria2/tuic/wireguard/reality → Clash/Surge/QX/Loon/Shadowrocket/Sing-box 等</p>
+    
+    <label>订阅链接：</label><br>
+    <input type="url" id="url" placeholder="https://example.com/sub.txt" style="width: 100%;"><br>
+    
+    <label>目标格式：</label><br>
+    <select id="target">
+        <option value="clash">Clash (YAML)</option>
+        <option value="surge">Surge</option>
+        <option value="qx">Quantumult X</option>
+        <option value="loon">Loon</option>
+        <option value="shadowrocket">Shadowrocket</option>
+        <option value="sing-box">Sing-box</option>
+        <option value="v2ray">V2Ray URI</option>
+    </select><br>
+    
+    <label>配置模板 (可选)：</label><br>
+    <select id="config">
+        <option value="base/config/example.ini">默认 (Clash 示例)</option>
+        <option value="base/config/surge.ini">Surge 示例</option>
+        <option value="base/config/quantumultx.ini">QX 示例</option>
+    </select><br>
+    
+    <button onclick="convert()">转换订阅</button>
+    
+    <h3>输出结果：</h3>
+    <div id="output">粘贴订阅链接并点击转换...</div>
+
+    <script>
+        const SUBCONVERTER_URL = 'https://ghcr.io/metacubex/subconverter:latest'; // 公共后端，稳定快 (或换成你自己的)
+        
+        async function convert() {
+            const url = document.getElementById('url').value;
+            const target = document.getElementById('target').value;
+            const config = document.getElementById('config').value;
+            if (!url) return alert('请输入订阅链接！');
+            
+            const params = new URLSearchParams({ target, url, config });
+            try {
+                const res = await fetch(`${SUBCONVERTER_URL}/sub?${params}`);
+                const text = await res.text();
+                document.getElementById('output').textContent = text;
+            } catch (e) {
+                document.getElementById('output').textContent = '转换失败：' + e.message + '\n建议检查链接或用本地后端。';
+            }
+        }
+        
+        function toggleDark() {
+            document.body.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>
